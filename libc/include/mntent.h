@@ -29,7 +29,6 @@
 #define _MNTENT_H_
 
 #include <stdio.h>
-#include <sys/cdefs.h>
 
 #define MNTTYPE_IGNORE "ignore"
 

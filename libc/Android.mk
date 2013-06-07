@@ -8,36 +8,123 @@ libc_common_src_files := \
 	$(syscall_src) \
 	unistd/abort.c \
 	unistd/alarm.c \
+	unistd/brk.c \
+	unistd/daemon.c \
+	unistd/eventfd.c \
 	unistd/exec.c \
+	unistd/fcntl.c \
 	unistd/fnmatch.c \
+	unistd/fstatfs.c \
+	unistd/ftime.c \
+	unistd/ftok.c \
+	unistd/getdtablesize.c \
+	unistd/gethostname.c \
 	unistd/getopt_long.c \
+	unistd/getpgrp.c \
+	unistd/getpriority.c \
+	unistd/getpt.c \
+	unistd/initgroups.c \
+	unistd/isatty.c \
+	unistd/issetugid.c \
+	unistd/killpg.c \
+	unistd/lseek64.c \
+	unistd/mmap.c \
+	unistd/open.c \
+	unistd/openat.c \
+	unistd/opendir.c \
+	unistd/pathconf.c \
+	unistd/perror.c \
+	unistd/popen.c \
+	unistd/pread.c \
+	unistd/pselect.c \
+	unistd/ptsname.c \
+	unistd/ptsname_r.c \
+	unistd/pwrite.c \
+	unistd/raise.c \
+	unistd/reboot.c \
+	unistd/recv.c \
+	unistd/sbrk.c \
+	unistd/send.c \
+	unistd/setegid.c \
+	unistd/setuid.c \
+	unistd/seteuid.c \
+	unistd/setreuid.c \
+	unistd/setresuid.c \
+	unistd/setpgrp.c \
+	unistd/sigblock.c \
+	unistd/siginterrupt.c \
+	unistd/siglist.c \
+	unistd/signal.c \
+	unistd/signame.c \
+	unistd/sigsetmask.c \
+	unistd/sigsuspend.c \
+	unistd/sigwait.c \
+	unistd/sleep.c \
+	unistd/statfs.c \
 	unistd/syslog.c \
 	unistd/system.c \
+	unistd/tcgetpgrp.c \
+	unistd/tcsetpgrp.c \
 	unistd/time.c \
+	unistd/umount.c \
+	unistd/unlockpt.c \
+	unistd/usleep.c \
+	unistd/wait.c \
 	stdio/asprintf.c \
+	stdio/clrerr.c \
+	stdio/fclose.c \
+	stdio/fdopen.c \
+	stdio/feof.c \
+	stdio/ferror.c \
 	stdio/fflush.c \
 	stdio/fgetc.c \
+	stdio/fgetln.c \
+	stdio/fgetpos.c \
+	stdio/fgets.c \
+	stdio/fileno.c \
 	stdio/findfp.c \
+	stdio/flags.c \
+	stdio/flockfile.c \
+	stdio/fopen.c \
 	stdio/fprintf.c \
+	stdio/fpurge.c \
 	stdio/fputc.c \
+	stdio/fputs.c \
 	stdio/fread.c \
 	stdio/freopen.c \
 	stdio/fscanf.c \
 	stdio/fseek.c \
+	stdio/fsetpos.c \
 	stdio/ftell.c \
+	stdio/funopen.c \
 	stdio/fvwrite.c \
+	stdio/fwalk.c \
+	stdio/fwrite.c \
+	stdio/getc.c \
+	stdio/getchar.c \
 	stdio/gets.c \
 	stdio/makebuf.c \
 	stdio/mktemp.c \
 	stdio/printf.c \
+	stdio/putc.c \
+	stdio/putchar.c \
+	stdio/puts.c \
+	stdio/putw.c \
 	stdio/refill.c \
+	stdio/remove.c \
 	stdio/rewind.c \
+	stdio/rget.c \
 	stdio/scanf.c \
+	stdio/setbuf.c \
+	stdio/setbuffer.c \
 	stdio/setvbuf.c \
 	stdio/snprintf.c\
 	stdio/sprintf.c \
 	stdio/sscanf.c \
 	stdio/stdio.c \
+	stdio/tempnam.c \
+	stdio/tmpfile.c \
+	stdio/tmpnam.c \
 	stdio/ungetc.c \
 	stdio/vasprintf.c \
 	stdio/vfprintf.c \
@@ -48,12 +135,38 @@ libc_common_src_files := \
 	stdio/vscanf.c \
 	stdio/vsscanf.c \
 	stdio/wbuf.c \
+	stdio/wsetup.c \
+	stdio/__fgets_chk.c \
+	stdio/__snprintf_chk.c \
+	stdio/__sprintf_chk.c \
+	stdio/__vsnprintf_chk.c \
+	stdio/__vsprintf_chk.c \
+	stdlib/_rand48.c \
+	stdlib/assert.c \
 	stdlib/atexit.c \
+	stdlib/atoi.c \
+	stdlib/atol.c \
+	stdlib/atoll.c \
+	stdlib/bsearch.c \
 	stdlib/ctype_.c \
+	stdlib/div.c \
 	stdlib/exit.c \
 	stdlib/getenv.c \
+	stdlib/jrand48.c \
+	stdlib/ldiv.c \
+	stdlib/lldiv.c \
+	stdlib/locale.c \
+	stdlib/lrand48.c \
+	stdlib/mrand48.c \
+	stdlib/nrand48.c \
 	stdlib/putenv.c \
+	stdlib/qsort.c \
+	stdlib/seed48.c \
 	stdlib/setenv.c \
+	stdlib/setjmperr.c \
+	stdlib/srand48.c \
+	stdlib/strntoimax.c \
+	stdlib/strntoumax.c \
 	stdlib/strtod.c \
 	stdlib/strtoimax.c \
 	stdlib/strtol.c \
@@ -63,115 +176,129 @@ libc_common_src_files := \
 	stdlib/strtoumax.c \
 	stdlib/tolower_.c \
 	stdlib/toupper_.c \
+	stdlib/wchar.c \
 	string/index.c \
+	string/memccpy.c \
+	string/memmem.c \
+	string/memrchr.c \
+	string/memswap.c \
 	string/strcasecmp.c \
+	string/strcasestr.c \
 	string/strcat.c \
+	string/strcoll.c \
 	string/strcspn.c \
 	string/strdup.c \
 	string/strlcat.c \
 	string/strlcpy.c \
 	string/strncat.c \
 	string/strncpy.c \
+	string/strndup.c \
+	string/strnlen.c \
 	string/strpbrk.c \
 	string/strrchr.c \
 	string/strsep.c \
 	string/strspn.c \
 	string/strstr.c \
 	string/strtok.c \
+	string/strtotimeval.c \
+	string/__memcpy_chk.c \
+	string/__memmove_chk.c \
+	string/__memset_chk.c \
+	string/__strcat_chk.c \
+	string/__strcpy_chk.c \
+	string/__strlcat_chk.c \
+	string/__strlcpy_chk.c \
+	string/__strlen_chk.c \
+	string/__strncat_chk.c \
+	string/__strncpy_chk.c \
+	wchar/wcpcpy.c \
+	wchar/wcpncpy.c \
+	wchar/wcscasecmp.c \
+	wchar/wcscat.c \
+	wchar/wcschr.c \
+	wchar/wcscmp.c \
+	wchar/wcscoll.c \
+	wchar/wcscpy.c \
+	wchar/wcscspn.c \
+	wchar/wcsdup.c \
+	wchar/wcslcat.c \
+	wchar/wcslcpy.c \
+	wchar/wcslen.c \
+	wchar/wcsncasecmp.c \
+	wchar/wcsncat.c \
+	wchar/wcsncmp.c \
+	wchar/wcsncpy.c \
+	wchar/wcsnlen.c \
+	wchar/wcspbrk.c \
+	wchar/wcsrchr.c \
+	wchar/wcsspn.c \
+	wchar/wcsstr.c \
+	wchar/wcstok.c \
 	wchar/wcswidth.c \
 	wchar/wcsxfrm.c \
+	wchar/wmemchr.c \
+	wchar/wmemcmp.c \
+	wchar/wmemcpy.c \
+	wchar/wmemmove.c \
+	wchar/wmemset.c \
+	inet/bindresvport.c \
+	inet/inet_addr.c \
+	inet/inet_aton.c \
+	inet/inet_ntoa.c \
+	inet/inet_ntop.c \
+	inet/inet_pton.c \
+	inet/ether_aton.c \
+	inet/ether_ntoa.c \
 	tzcode/asctime.c \
 	tzcode/difftime.c \
 	tzcode/localtime.c \
 	tzcode/strftime.c \
 	tzcode/strptime.c \
-	bionic/arc4random.c \
-	bionic/atoi.c \
-	bionic/atol.c \
-	bionic/atoll.c \
-	bionic/bindresvport.c \
+	bionic/__set_errno.c \
 	bionic/bionic_clone.c \
-	bionic/clearenv.c \
 	bionic/cpuacct.c \
-	bionic/daemon.c \
+	bionic/arc4random.c \
+	bionic/basename.c \
+	bionic/basename_r.c \
+	bionic/clearenv.c \
+	bionic/dirname.c \
+	bionic/dirname_r.c \
+	bionic/drand48.c \
+	bionic/erand48.c \
 	bionic/err.c \
-	bionic/ether_aton.c \
-	bionic/ether_ntoa.c \
-	bionic/fcntl.c \
 	bionic/fdprintf.c \
-	bionic/flockfile.c \
 	bionic/fork.c \
-	bionic/fstatfs.c \
-	bionic/ftime.c \
-	bionic/ftok.c \
 	bionic/fts.c \
-	bionic/getdtablesize.c \
-	bionic/gethostname.c \
-	bionic/getpgrp.c \
-	bionic/getpriority.c \
-	bionic/getpt.c \
-	bionic/if_indextoname.c \
+	bionic/getcwd.cpp \
 	bionic/if_nametoindex.c \
-	bionic/initgroups.c \
+	bionic/if_indextoname.c \
 	bionic/ioctl.c \
-	bionic/isatty.c \
-	bionic/issetugid.c \
 	bionic/ldexp.c \
-	bionic/lseek64.c \
+	bionic/libc_init_common.c \
+	bionic/logd_write.c \
 	bionic/md5.c \
-	bionic/memchr.c \
-	bionic/memmem.c \
-	bionic/memrchr.c \
-	bionic/memswap.c \
-	bionic/mmap.c \
-	bionic/openat.c \
-	bionic/open.c \
-	bionic/pathconf.c \
-	bionic/perror.c \
-	bionic/pread.c \
-	bionic/pselect.c \
-	bionic/ptsname.c \
-	bionic/ptsname_r.c \
+	bionic/memmove_words.c \
 	bionic/pututline.c \
-	bionic/pwrite.c \
-	bionic/reboot.c \
-	bionic/recv.c \
+	bionic/realpath.c \
+	bionic/sched_getaffinity.c \
+	bionic/sched_getcpu.c \
 	bionic/sched_cpualloc.c \
 	bionic/sched_cpucount.c \
-	bionic/sched_getcpu.c \
 	bionic/semaphore.c \
-	bionic/send.c \
-	bionic/setegid.c \
-	bionic/seteuid.c \
-	bionic/setpgrp.c \
-	bionic/setresuid.c \
-	bionic/setreuid.c \
-	bionic/setuid.c \
-	bionic/sigblock.c \
-	bionic/siginterrupt.c \
-	bionic/siglist.c \
-	bionic/signal.c \
-	bionic/signame.c \
-	bionic/sigsetmask.c \
-	bionic/sigsuspend.c \
-	bionic/sleep.c \
-	bionic/statfs.c \
-	bionic/strndup.c \
-	bionic/strnlen.c \
-	bionic/strntoimax.c \
-	bionic/strntoumax.c \
-	bionic/strtotimeval.c \
+	bionic/sha1.c \
+	bionic/strerror.cpp \
+	bionic/strerror_r.cpp \
+	bionic/strsignal.cpp \
+	bionic/stubs.cpp \
 	bionic/system_properties.c \
-	bionic/tcgetpgrp.c \
-	bionic/tcsetpgrp.c \
-	bionic/thread_atexit.c \
+	bionic/tdestroy.c \
 	bionic/time64.c \
-	bionic/umount.c \
-	bionic/unlockpt.c \
-	bionic/usleep.c \
+	bionic/thread_atexit.c \
+	bionic/utime.c \
 	bionic/utmp.c \
-	bionic/wcscoll.c \
 	netbsd/gethnamaddr.c \
+	netbsd/isc/ev_timers.c \
+	netbsd/isc/ev_streams.c \
 	netbsd/inet/nsap_addr.c \
 	netbsd/resolv/__dn_comp.c \
 	netbsd/resolv/__res_close.c \
@@ -200,175 +327,86 @@ libc_common_src_files := \
 	netbsd/nameser/ns_print.c \
 	netbsd/nameser/ns_samedomain.c \
 
-libc_bionic_src_files := \
-    bionic/assert.cpp \
-    bionic/brk.cpp \
-    bionic/dirent.cpp \
-    bionic/__errno.c \
-    bionic/eventfd_read.cpp \
-    bionic/eventfd_write.cpp \
-    bionic/__fgets_chk.cpp \
-    bionic/getauxval.cpp \
-    bionic/getcwd.cpp \
-    bionic/libc_init_common.cpp \
-    bionic/libc_logging.cpp \
-    bionic/libgen.cpp \
-    bionic/__memcpy_chk.cpp \
-    bionic/__memmove_chk.cpp \
-    bionic/__memset_chk.cpp \
-    bionic/pthread_attr.cpp \
-    bionic/pthread_detach.cpp \
-    bionic/pthread_equal.cpp \
-    bionic/pthread_getcpuclockid.cpp \
-    bionic/pthread_getschedparam.cpp \
-    bionic/pthread_internals.cpp \
-    bionic/pthread_join.cpp \
-    bionic/pthread_kill.cpp \
-    bionic/pthread_self.cpp \
-    bionic/pthread_setname_np.cpp \
-    bionic/pthread_setschedparam.cpp \
-    bionic/pthread_sigmask.cpp \
-    bionic/raise.cpp \
-    bionic/sbrk.cpp \
-    bionic/scandir.cpp \
-    bionic/sched_getaffinity.cpp \
-    bionic/__set_errno.cpp \
-    bionic/setlocale.cpp \
-    bionic/signalfd.cpp \
-    bionic/sigwait.cpp \
-    bionic/__strcat_chk.cpp \
-    bionic/strchr.cpp \
-    bionic/__strcpy_chk.cpp \
-    bionic/strerror.cpp \
-    bionic/strerror_r.cpp \
-    bionic/__strlcat_chk.cpp \
-    bionic/__strlcpy_chk.cpp \
-    bionic/__strlen_chk.cpp \
-    bionic/__strncat_chk.cpp \
-    bionic/__strncpy_chk.cpp \
-    bionic/strsignal.cpp \
-    bionic/stubs.cpp \
-    bionic/sysconf.cpp \
-    bionic/tdestroy.cpp \
-    bionic/tmpfile.cpp \
-    bionic/__umask_chk.cpp \
-    bionic/__vsnprintf_chk.cpp \
-    bionic/__vsprintf_chk.cpp \
-    bionic/wait.cpp \
-    bionic/wchar.cpp \
-
-libc_upstream_freebsd_src_files := \
-    upstream-freebsd/lib/libc/stdio/clrerr.c \
-    upstream-freebsd/lib/libc/stdio/fclose.c \
-    upstream-freebsd/lib/libc/stdio/fdopen.c \
-    upstream-freebsd/lib/libc/stdio/feof.c \
-    upstream-freebsd/lib/libc/stdio/ferror.c \
-    upstream-freebsd/lib/libc/stdio/fgetln.c \
-    upstream-freebsd/lib/libc/stdio/fgetpos.c \
-    upstream-freebsd/lib/libc/stdio/fgets.c \
-    upstream-freebsd/lib/libc/stdio/fileno.c \
-    upstream-freebsd/lib/libc/stdio/flags.c \
-    upstream-freebsd/lib/libc/stdio/fopen.c \
-    upstream-freebsd/lib/libc/stdio/fpurge.c \
-    upstream-freebsd/lib/libc/stdio/fputs.c \
-    upstream-freebsd/lib/libc/stdio/fsetpos.c \
-    upstream-freebsd/lib/libc/stdio/funopen.c \
-    upstream-freebsd/lib/libc/stdio/fwalk.c \
-    upstream-freebsd/lib/libc/stdio/fwrite.c \
-    upstream-freebsd/lib/libc/stdio/getc.c \
-    upstream-freebsd/lib/libc/stdio/getchar.c \
-    upstream-freebsd/lib/libc/stdio/putc.c \
-    upstream-freebsd/lib/libc/stdio/putchar.c \
-    upstream-freebsd/lib/libc/stdio/puts.c \
-    upstream-freebsd/lib/libc/stdio/putw.c \
-    upstream-freebsd/lib/libc/stdio/remove.c \
-    upstream-freebsd/lib/libc/stdio/rget.c \
-    upstream-freebsd/lib/libc/stdio/setbuf.c \
-    upstream-freebsd/lib/libc/stdio/setbuffer.c \
-    upstream-freebsd/lib/libc/stdio/tempnam.c \
-    upstream-freebsd/lib/libc/stdio/tmpnam.c \
-    upstream-freebsd/lib/libc/stdio/wsetup.c \
-    upstream-freebsd/lib/libc/stdlib/qsort.c \
-    upstream-freebsd/lib/libc/stdlib/realpath.c \
-    upstream-freebsd/lib/libc/string/wcpcpy.c \
-    upstream-freebsd/lib/libc/string/wcpncpy.c \
-    upstream-freebsd/lib/libc/string/wcscasecmp.c \
-    upstream-freebsd/lib/libc/string/wcscat.c \
-    upstream-freebsd/lib/libc/string/wcschr.c \
-    upstream-freebsd/lib/libc/string/wcscmp.c \
-    upstream-freebsd/lib/libc/string/wcscpy.c \
-    upstream-freebsd/lib/libc/string/wcscspn.c \
-    upstream-freebsd/lib/libc/string/wcsdup.c \
-    upstream-freebsd/lib/libc/string/wcslcat.c \
-    upstream-freebsd/lib/libc/string/wcslcpy.c \
-    upstream-freebsd/lib/libc/string/wcslen.c \
-    upstream-freebsd/lib/libc/string/wcsncasecmp.c \
-    upstream-freebsd/lib/libc/string/wcsncat.c \
-    upstream-freebsd/lib/libc/string/wcsncmp.c \
-    upstream-freebsd/lib/libc/string/wcsncpy.c \
-    upstream-freebsd/lib/libc/string/wcsnlen.c \
-    upstream-freebsd/lib/libc/string/wcspbrk.c \
-    upstream-freebsd/lib/libc/string/wcsrchr.c \
-    upstream-freebsd/lib/libc/string/wcsspn.c \
-    upstream-freebsd/lib/libc/string/wcsstr.c \
-    upstream-freebsd/lib/libc/string/wcstok.c \
-    upstream-freebsd/lib/libc/string/wmemchr.c \
-    upstream-freebsd/lib/libc/string/wmemcmp.c \
-    upstream-freebsd/lib/libc/string/wmemcpy.c \
-    upstream-freebsd/lib/libc/string/wmemmove.c \
-    upstream-freebsd/lib/libc/string/wmemset.c \
-
 libc_upstream_netbsd_src_files := \
-    upstream-netbsd/common/lib/libc/hash/sha1/sha1.c \
-    upstream-netbsd/common/lib/libc/inet/inet_addr.c \
-    upstream-netbsd/libc/compat-43/creat.c \
-    upstream-netbsd/libc/gen/ftw.c \
-    upstream-netbsd/libc/gen/nftw.c \
-    upstream-netbsd/libc/gen/nice.c \
-    upstream-netbsd/libc/gen/popen.c \
-    upstream-netbsd/libc/gen/psignal.c \
-    upstream-netbsd/libc/gen/setjmperr.c \
-    upstream-netbsd/libc/gen/utime.c \
-    upstream-netbsd/libc/inet/inet_ntoa.c \
-    upstream-netbsd/libc/inet/inet_ntop.c \
-    upstream-netbsd/libc/inet/inet_pton.c \
-    upstream-netbsd/libc/isc/ev_streams.c \
-    upstream-netbsd/libc/isc/ev_timers.c \
-    upstream-netbsd/libc/regex/regcomp.c \
-    upstream-netbsd/libc/regex/regerror.c \
-    upstream-netbsd/libc/regex/regexec.c \
-    upstream-netbsd/libc/regex/regfree.c \
-    upstream-netbsd/libc/stdio/getdelim.c \
-    upstream-netbsd/libc/stdio/getline.c \
-    upstream-netbsd/libc/stdlib/bsearch.c \
-    upstream-netbsd/libc/stdlib/div.c \
-    upstream-netbsd/libc/stdlib/drand48.c \
-    upstream-netbsd/libc/stdlib/erand48.c \
-    upstream-netbsd/libc/stdlib/jrand48.c \
-    upstream-netbsd/libc/stdlib/ldiv.c \
-    upstream-netbsd/libc/stdlib/lldiv.c \
-    upstream-netbsd/libc/stdlib/lrand48.c \
-    upstream-netbsd/libc/stdlib/mrand48.c \
-    upstream-netbsd/libc/stdlib/nrand48.c \
-    upstream-netbsd/libc/stdlib/_rand48.c \
-    upstream-netbsd/libc/stdlib/seed48.c \
-    upstream-netbsd/libc/stdlib/srand48.c \
-    upstream-netbsd/libc/stdlib/tdelete.c \
-    upstream-netbsd/libc/stdlib/tfind.c \
-    upstream-netbsd/libc/stdlib/tsearch.c \
-    upstream-netbsd/libc/string/memccpy.c \
-    upstream-netbsd/libc/string/strcasestr.c \
-    upstream-netbsd/libc/string/strcoll.c \
-    upstream-netbsd/libc/string/strxfrm.c \
-    upstream-netbsd/libc/unistd/killpg.c \
+	upstream-netbsd/libc/compat-43/creat.c \
+	upstream-netbsd/libc/gen/ftw.c \
+	upstream-netbsd/libc/gen/nftw.c \
+	upstream-netbsd/libc/gen/nice.c \
+	upstream-netbsd/libc/gen/psignal.c \
+	upstream-netbsd/libc/regex/regcomp.c \
+	upstream-netbsd/libc/regex/regerror.c \
+	upstream-netbsd/libc/regex/regexec.c \
+	upstream-netbsd/libc/regex/regfree.c \
+	upstream-netbsd/libc/stdlib/tdelete.c \
+	upstream-netbsd/libc/stdlib/tfind.c \
+	upstream-netbsd/libc/stdlib/tsearch.c \
+	upstream-netbsd/libc/string/strxfrm.c \
+
+# The following files are common, but must be compiled
+# with different C flags when building a static C library.
+#
+# The reason for this is the implementation of __get_tls()
+# that will differ between the shared and static versions
+# of the library.
+#
+# See comments in private/bionic_tls.h for more details.
+#
+# NOTE: bionic/pthread.c is added later to this list
+#       because it needs special handling on ARM, see
+#       below.
+#
+libc_static_common_src_files := \
+        unistd/sysconf.c \
+        bionic/__errno.c \
 
 # Architecture specific source files go here
 # =========================================================
 ifeq ($(TARGET_ARCH),arm)
 libc_common_src_files += \
-	bionic/memmove.c.arm \
-	string/bcopy.c \
+	arch-arm/bionic/__get_sp.S \
+	arch-arm/bionic/_exit_with_stack_teardown.S \
+	arch-arm/bionic/_setjmp.S \
+	arch-arm/bionic/abort_arm.S \
+	arch-arm/bionic/atomics_arm.c \
+	arch-arm/bionic/clone.S \
+	arch-arm/bionic/eabi.c \
+	arch-arm/bionic/ffs.S \
+	arch-arm/bionic/futex_arm.S \
+	arch-arm/bionic/kill.S \
+	arch-arm/bionic/libgcc_compat.c \
+	arch-arm/bionic/tkill.S \
+	arch-arm/bionic/tgkill.S \
+	arch-arm/bionic/memcmp.S \
+	arch-arm/bionic/memcmp16.S \
+	arch-arm/bionic/setjmp.S \
+	arch-arm/bionic/sigsetjmp.S \
+	arch-arm/bionic/strcmp.S \
+	arch-arm/bionic/syscall.S \
 	string/strncmp.c \
+	unistd/socketcalls.c
+
+# Check if we want a neonized version of memmove instead of the
+# current ARM version
+ifeq ($(ARCH_ARM_HAVE_NEON),true)
+ libc_common_src_files += \
+	arch-arm/bionic/memmove.S
+ else # Other ARM
+ libc_common_src_files += \
+	string/bcopy.c \
+	string/memmove.c.arm
+endif # ARCH_ARM_HAVE_NEON
+
+# If the kernel supports kernel user helpers for gettimeofday, use
+# that instead.
+ifeq ($(KERNEL_HAS_GETTIMEOFDAY_HELPER),true)
+  libc_common_src_files := $(filter-out arch-arm/syscalls/gettimeofday.S,$(libc_common_src_files))
+  libc_common_src_files := $(filter-out arch-arm/syscalls/clock_gettime.S,$(libc_common_src_files))
+  libc_common_src_files += \
+	arch-arm/bionic/gettimeofday.c \
+	arch-arm/bionic/gettimeofday_syscall.S \
+	arch-arm/bionic/clock_gettime.c \
+	arch-arm/bionic/clock_gettime_syscall.S
+endif # KERNEL_HAS_GETTIMEOFDAY_HELPER
 
 # These files need to be arm so that gdbserver
 # can set breakpoints in them without messing
@@ -380,31 +418,121 @@ libc_common_src_files += \
 	bionic/ptrace.c.arm
 
 libc_static_common_src_files += \
-    bionic/pthread.c.arm \
-    bionic/pthread_create.cpp.arm \
-    bionic/pthread_key.cpp.arm \
+        bionic/pthread.c.arm \
+
+# these are used by the static and dynamic versions of the libc
+# respectively
+libc_arch_static_src_files := \
+	arch-arm/bionic/exidx_static.c
+
+libc_arch_dynamic_src_files := \
+	arch-arm/bionic/exidx_dynamic.c
+
+# linaro optimized string routines are opt-in	
+TARGET_USE_LINARO_STRING_ROUTINES ?= false
+
+# We have a special memcpy for A15 currently
+ifeq ($(TARGET_ARCH_VARIANT_CPU),cortex-a15)
+libc_common_src_files += arch-arm/bionic/memcpy-a15.S
+else
+libc_common_src_files += arch-arm/bionic/memcpy.S
+endif
+
+#We can only use linaro optimizations on Arm-v7a
+ifeq ($(TARGET_USE_LINARO_STRING_ROUTINES)-$(ARCH_ARM_HAVE_ARMV7A),true-true)
+libc_common_src_files += \
+    arch-arm/bionic/armv7/bzero.S \
+	arch-arm/bionic/armv7/memchr.S \
+	arch-arm/bionic/armv7/memset.S \
+	arch-arm/bionic/armv7/strchr.S \
+	arch-arm/bionic/armv7/strcpy.c \
+	arch-arm/bionic/armv7/strlen.S
+else
+libc_common_src_files += \
+	string/memchr.c \
+	arch-arm/bionic/memset.S \
+	string/strchr.c \
+	arch-arm/bionic/strcpy.S \
+	arch-arm/bionic/strlen.c.arm
+endif
+
+ifeq ($(ARCH_ARM_HAVE_ARMV7A),true)	
+    libc_common_cflags += -DNEON_UNALIGNED_ACCESS -DNEON_MEMCPY_ALIGNMENT_DIVIDER=224	
+endif
+
+else # arm
+
+libc_common_src_files += \
+	string/memchr.c \
+	string/strchr.c
 
 endif # arm
 
 ifeq ($(TARGET_ARCH),x86)
 libc_common_src_files += \
-    bionic/pthread-atfork.c \
-    bionic/pthread-rwlocks.c \
-    bionic/pthread-timers.c \
-    bionic/ptrace.c \
-    string/strcpy.c \
+	arch-x86/bionic/__get_sp.S \
+	arch-x86/bionic/__get_tls.c \
+	arch-x86/bionic/__set_tls.c \
+	arch-x86/bionic/clone.S \
+	arch-x86/bionic/_exit_with_stack_teardown.S \
+	arch-x86/bionic/futex_x86.S \
+	arch-x86/bionic/setjmp.S \
+	arch-x86/bionic/_setjmp.S \
+	arch-x86/bionic/sigsetjmp.S \
+	arch-x86/bionic/vfork.S \
+	arch-x86/bionic/syscall.S \
+	arch-x86/string/bcopy_wrapper.S \
+	arch-x86/string/memcpy_wrapper.S \
+	arch-x86/string/memmove_wrapper.S \
+	arch-x86/string/bzero_wrapper.S \
+	arch-x86/string/memcmp_wrapper.S \
+	arch-x86/string/memset_wrapper.S \
+	arch-x86/string/strcmp_wrapper.S \
+	arch-x86/string/strncmp_wrapper.S \
+	arch-x86/string/strlen_wrapper.S \
+	bionic/memmove_words.c \
+	string/strcpy.c \
+	bionic/pthread-atfork.c \
+	bionic/pthread-rwlocks.c \
+	bionic/pthread-timers.c \
+	bionic/ptrace.c
 
 libc_static_common_src_files += \
-    bionic/pthread.c \
-    bionic/pthread_create.cpp \
-    bionic/pthread_key.cpp \
+        bionic/pthread.c \
 
+libc_arch_static_src_files := \
+	bionic/dl_iterate_phdr_static.c
+
+libc_arch_dynamic_src_files :=
 endif # x86
 
 ifeq ($(TARGET_ARCH),mips)
 libc_common_src_files += \
-	bionic/memcmp.c \
+	arch-mips/bionic/__get_sp.S \
+	arch-mips/bionic/__get_tls.c \
+	arch-mips/bionic/__set_tls.c \
+	arch-mips/bionic/_exit_with_stack_teardown.S \
+	arch-mips/bionic/_setjmp.S \
+	arch-mips/bionic/futex_mips.S \
+	arch-mips/bionic/bzero.S \
+	arch-mips/bionic/cacheflush.c \
+	arch-mips/bionic/clone.S \
+	arch-mips/bionic/ffs.S \
+	arch-mips/bionic/memcmp16.S \
+	arch-mips/bionic/memmove.c \
+	arch-mips/bionic/pipe.S \
+	arch-mips/bionic/setjmp.S \
+	arch-mips/bionic/sigsetjmp.S \
+	arch-mips/bionic/vfork.S
+
+libc_common_src_files += \
+	arch-mips/string/memset.S \
+	arch-mips/string/memcpy.S \
+	arch-mips/string/mips_strlen.c
+
+libc_common_src_files += \
 	string/bcopy.c \
+	string/memcmp.c \
 	string/strcmp.c \
 	string/strcpy.c \
 	string/strncmp.c
@@ -416,45 +544,13 @@ libc_common_src_files += \
 	bionic/ptrace.c
 
 libc_static_common_src_files += \
-    bionic/pthread.c \
-    bionic/pthread_create.cpp \
-    bionic/pthread_key.cpp \
+	bionic/pthread.c
 
+libc_arch_static_src_files := \
+	bionic/dl_iterate_phdr_static.c
+
+libc_arch_dynamic_src_files :=
 endif # mips
-
-ifeq ($(strip $(TARGET_CPU_VARIANT)),)
-$(warning TARGET_CPU_VARIANT is not defined)
-endif
-
-###########################################################
-## Add cpu specific source files.
-##
-## This can be called multiple times, but it will only add
-## the first source file for each unique $(1).
-## $(1): Unique identifier to identify the cpu variant
-##       implementation.
-## $(2): Cpu specific source file.
-###########################################################
-
-define libc-add-cpu-variant-src
-$(if $(filter true,$(_LIBC_ARCH_CPU_VARIANT_HAS_$(1))), \
-	, \
-     $(eval _LIBC_ARCH_CPU_VARIANT_HAS_$(1) := true) \
-     $(eval _LIBC_ARCH_CPU_VARIANT_SRC_FILE.$(1) := $(2)) \
-     $(eval _LIBC_ARCH_CPU_VARIANT_SRC_FILES += $(2)) \
-)
-endef
-
-_LIBC_ARCH_COMMON_SRC_FILES :=
-_LIBC_ARCH_CPU_VARIANT_SRC_FILES :=
-_LIBC_ARCH_STATIC_SRC_FILES :=
-_LIBC_ARCH_DYNAMIC_SRC_FILES :=
-include bionic/libc/arch-$(TARGET_ARCH)/$(TARGET_ARCH).mk
-
-libc_common_src_files += $(_LIBC_ARCH_COMMON_SRC_FILES)
-libc_common_src_files += $(_LIBC_ARCH_CPU_VARIANT_SRC_FILES)
-libc_arch_static_src_files := $(_LIBC_ARCH_STATIC_SRC_FILES)
-libc_arch_dynamic_src_files := $(_LIBC_ARCH_DYNAMIC_SRC_FILES)
 
 # Define some common cflags
 # ========================================================
@@ -467,6 +563,7 @@ libc_common_cflags := \
     -I$(LOCAL_PATH)/private \
     -DPOSIX_MISTAKE \
     -DLOG_ON_HEAP_ERROR \
+    -std=gnu99 \
     -Wall -Wextra
 
 # these macro definitions are required to implement the
@@ -492,6 +589,76 @@ ifeq ($(TARGET_ARCH),arm)
   libc_common_cflags += -DSOFTFLOAT
   libc_common_cflags += -fstrict-aliasing
   libc_crt_target_cflags := -mthumb-interwork
+  #
+  # Define HAVE_ARM_TLS_REGISTER macro to indicate to the C library
+  # that it should access the hardware TLS register directly in
+  # private/bionic_tls.h
+  #
+  # The value must match your kernel configuration
+  #
+  ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
+    libc_common_cflags += -DHAVE_ARM_TLS_REGISTER
+  endif
+  #
+  # Define HAVE_32_BYTE_CACHE_LINES to indicate to C
+  # library it should use to 32-byte version of memcpy, and not
+  # the 64-byte version.
+  #
+  ifeq ($(ARCH_ARM_HAVE_32_BYTE_CACHE_LINES),true)
+    libc_common_cflags += -DHAVE_32_BYTE_CACHE_LINE
+  endif
+  ifeq ($(ARCH_ARM_USE_NON_NEON_MEMCPY),true)
+    libc_common_cflags += -DARCH_ARM_USE_NON_NEON_MEMCPY
+  endif
+
+
+  ifeq ($(ARCH_ARM_HAVE_NEON_UNALIGNED_ACCESS),true)
+    libc_common_cflags += -DNEON_UNALIGNED_ACCESS
+  endif
+  ifneq ($(ARCH_ARM_NEON_MEMCPY_ALIGNMENT_DIVIDER),)
+    libc_common_cflags += -DNEON_MEMCPY_ALIGNMENT_DIVIDER=$(ARCH_ARM_NEON_MEMCPY_ALIGNMENT_DIVIDER)
+  endif
+  ifneq ($(ARCH_ARM_NEON_MEMSET_DIVIDER),)
+    libc_common_cflags += -DNEON_MEMSET_DIVIDER=$(ARCH_ARM_NEON_MEMSET_DIVIDER)
+  endif
+
+  # Add in defines to activate SCORPION_NEON_OPTIMIZATION
+  ifeq ($(TARGET_USE_SCORPION_BIONIC_OPTIMIZATION),true)
+    libc_common_cflags += -DSCORPION_NEON_OPTIMIZATION
+    ifeq ($(TARGET_USE_SCORPION_PLD_SET),true)
+      libc_common_cflags += -DPLDOFFS=$(TARGET_SCORPION_BIONIC_PLDOFFS)
+      libc_common_cflags += -DPLDSIZE=$(TARGET_SCORPION_BIONIC_PLDSIZE)
+    endif
+  endif
+  ifeq ($(TARGET_HAVE_TEGRA_ERRATA_657451),true)
+    libc_common_cflags += -DHAVE_TEGRA_ERRATA_657451
+  endif
+  # Add in defines to activate KRAIT_NEON_OPTIMIZATION
+  ifeq ($(TARGET_USE_KRAIT_BIONIC_OPTIMIZATION),true)
+    libc_common_cflags += -DKRAIT_NEON_OPTIMIZATION
+    ifeq ($(TARGET_USE_KRAIT_PLD_SET),true)
+      libc_common_cflags += -DPLDOFFS=$(TARGET_KRAIT_BIONIC_PLDOFFS)
+      libc_common_cflags += -DPLDTHRESH=$(TARGET_KRAIT_BIONIC_PLDTHRESH)
+      libc_common_cflags += -DPLDSIZE=$(TARGET_KRAIT_BIONIC_PLDSIZE)
+      libc_common_cflags += -DBBTHRESH=$(TARGET_KRAIT_BIONIC_BBTHRESH)
+    endif
+  endif
+  ifeq ($(TARGET_USE_SPARROW_BIONIC_OPTIMIZATION),true)
+    libc_common_cflags += -DSPARROW_NEON_OPTIMIZATION
+  endif
+  ifeq ($(TARGET_CORTEX_CACHE_LINE_32),true)
+    libc_common_cflags += -DCORTEX_CACHE_LINE_32
+  endif
+else # !arm
+  ifeq ($(TARGET_ARCH),x86)
+    libc_crt_target_cflags :=
+    ifeq ($(ARCH_X86_HAVE_SSE2),true)
+        libc_crt_target_cflags += -DUSE_SSE2=1
+    endif
+    ifeq ($(ARCH_X86_HAVE_SSSE3),true)
+        libc_crt_target_cflags += -DUSE_SSSE3=1
+    endif
+  endif # x86
 endif # !arm
 
 ifeq ($(TARGET_ARCH),x86)
@@ -562,7 +729,7 @@ ifeq ($(TARGET_ARCH),mips)
     libc_crt_target_so_cflags := -fPIC
 endif
 ifeq ($(TARGET_ARCH),x86)
-    libc_crtbegin_extension := c
+    libc_crtbegin_extension := S
     libc_crt_target_so_cflags := -fPIC
 endif
 ifeq ($(libc_crtbegin_extension),)
@@ -676,33 +843,10 @@ WITH_MALLOC_CHECK_LIBC_A := $(strip $(WITH_MALLOC_CHECK_LIBC_A))
 
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := bionic/__stack_chk_fail.cpp
-LOCAL_CFLAGS := $(libc_common_cflags) -fno-stack-protector -Werror
+LOCAL_SRC_FILES := bionic/ssp.c
+LOCAL_CFLAGS := $(libc_common_cflags) -fno-stack-protector
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 LOCAL_MODULE := libbionic_ssp
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-LOCAL_SYSTEM_SHARED_LIBRARIES :=
-
-include $(BUILD_STATIC_LIBRARY)
-
-
-# ========================================================
-# libc_freebsd.a - upstream FreeBSD C library code
-# ========================================================
-#
-# These files are built with the freebsd-compat.h header file
-# automatically included.
-
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(libc_upstream_freebsd_src_files)
-LOCAL_CFLAGS := \
-    $(libc_common_cflags) \
-    -I$(LOCAL_PATH)/upstream-freebsd \
-    -I$(LOCAL_PATH)/upstream-freebsd/libc/include \
-    -include upstream-freebsd/freebsd-compat.h
-LOCAL_C_INCLUDES := $(libc_common_c_includes)
-LOCAL_MODULE := libc_freebsd
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
@@ -722,26 +866,9 @@ LOCAL_SRC_FILES := $(libc_upstream_netbsd_src_files)
 LOCAL_CFLAGS := \
     $(libc_common_cflags) \
     -I$(LOCAL_PATH)/upstream-netbsd \
-    -I$(LOCAL_PATH)/upstream-netbsd/libc/include \
     -include upstream-netbsd/netbsd-compat.h
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 LOCAL_MODULE := libc_netbsd
-LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-LOCAL_SYSTEM_SHARED_LIBRARIES :=
-
-include $(BUILD_STATIC_LIBRARY)
-
-
-# ========================================================
-# libc_bionic.a - home-grown C library code
-# ========================================================
-#
-include $(CLEAR_VARS)
-
-LOCAL_SRC_FILES := $(libc_bionic_src_files)
-LOCAL_CFLAGS := $(libc_common_cflags) -Werror
-LOCAL_C_INCLUDES := $(libc_common_c_includes)
-LOCAL_MODULE := libc_bionic
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
@@ -755,13 +882,11 @@ include $(BUILD_STATIC_LIBRARY)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := $(libc_common_src_files)
-LOCAL_CFLAGS := $(libc_common_cflags) \
-    -std=gnu99 \
-    -I$(LOCAL_PATH)/upstream-netbsd/libc/include # for netbsd private headers
+LOCAL_CFLAGS := $(libc_common_cflags)
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 LOCAL_MODULE := libc_common
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-LOCAL_WHOLE_STATIC_LIBRARIES := libbionic_ssp libc_bionic libc_freebsd libc_netbsd
+LOCAL_WHOLE_STATIC_LIBRARIES := libbionic_ssp libc_netbsd
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
 include $(BUILD_STATIC_LIBRARY)
@@ -772,22 +897,21 @@ include $(BUILD_STATIC_LIBRARY)
 # ========================================================
 #
 # This is a version of the static C library that does not
-# include malloc. It's useful in situations when the user wants
-# to provide their own malloc implementation, or wants to
-# explicitly disallow the use of the use of malloc,
-# such as in the dynamic loader.
+# include malloc. It's useful in situations when calling
+# the user wants to provide their own malloc implementation,
+# or wants to explicitly disallow the use of the use of malloc,
+# like the dynamic loader.
 
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
 	$(libc_arch_static_src_files) \
 	$(libc_static_common_src_files) \
-	bionic/libc_init_static.cpp
+	bionic/libc_init_static.c
 
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 LOCAL_CFLAGS := $(libc_common_cflags) \
-                -DLIBC_STATIC \
-                -std=gnu99
+                -DLIBC_STATIC
 
 LOCAL_MODULE := libc_nomalloc
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
@@ -807,11 +931,10 @@ LOCAL_SRC_FILES := \
 	$(libc_static_common_src_files) \
 	bionic/dlmalloc.c \
 	bionic/malloc_debug_common.cpp \
-	bionic/libc_init_static.cpp
+	bionic/libc_init_static.c
 
 LOCAL_CFLAGS := $(libc_common_cflags) \
-                -DLIBC_STATIC \
-                -std=gnu99
+                -DLIBC_STATIC
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 LOCAL_MODULE := libc
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
@@ -832,7 +955,7 @@ include $(CLEAR_VARS)
 # Since this code is experimental it is disabled by default.
 # see libc/bionic/pthread_debug.c for details
 
-LOCAL_CFLAGS := $(libc_common_cflags) -std=gnu99 -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
+LOCAL_CFLAGS := $(libc_common_cflags) 
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 
 LOCAL_SRC_FILES := \
@@ -840,8 +963,7 @@ LOCAL_SRC_FILES := \
 	$(libc_static_common_src_files) \
 	bionic/dlmalloc.c \
 	bionic/malloc_debug_common.cpp \
-	bionic/pthread_debug.cpp \
-	bionic/libc_init_dynamic.cpp
+	bionic/libc_init_dynamic.c
 
 ifeq ($(TARGET_ARCH),arm)
 	LOCAL_NO_CRT := true
@@ -856,7 +978,6 @@ endif
 
 LOCAL_MODULE:= libc
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
-LOCAL_REQUIRED_MODULES := tzdata
 
 # WARNING: The only library libc.so should depend on is libdl.so!  If you add other libraries,
 # make sure to add -Wl,--exclude-libs=libgcc.a to the LOCAL_LDFLAGS for those libraries.  This
@@ -893,10 +1014,10 @@ LOCAL_CFLAGS := \
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
 
 LOCAL_SRC_FILES := \
-	bionic/debug_mapinfo.cpp \
-	bionic/debug_stacktrace.cpp \
 	bionic/malloc_debug_leak.cpp \
 	bionic/malloc_debug_check.cpp \
+	bionic/malloc_debug_check_mapinfo.cpp \
+	bionic/malloc_debug_stacktrace.cpp
 
 LOCAL_MODULE:= libc_malloc_debug_leak
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk

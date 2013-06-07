@@ -111,4 +111,3 @@ L3:	movzbl	(%eax),%eax		/* unsigned comparision */
 L4:	xorl	%eax,%eax
 	popl	%ebx
 	ret
-END(strncmp)

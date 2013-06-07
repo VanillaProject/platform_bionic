@@ -25,10 +25,10 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+.global __get_sp
+.type __get_sp, %function
 
-#include <machine/asm.h>
+__get_sp:
+	mov r0, sp
+	bx lr
 
-ENTRY(__get_sp)
-  mov r0, sp
-  bx lr
-END(__get_sp)

@@ -302,6 +302,17 @@ class SysCallsTxtParser:
         fp.close()
 
 
+class Output:
+    def  __init__(self,out=sys.stdout):
+        self.out = out
+
+    def write(self,msg):
+        self.out.write(msg)
+
+    def writeln(self,msg):
+        self.out.write(msg)
+        self.out.write("\n")
+
 class StringOutput:
     def __init__(self):
         self.line = ""
@@ -309,6 +320,10 @@ class StringOutput:
     def write(self,msg):
         self.line += msg
         D2("write '%s'" % msg)
+
+    def writeln(self,msg):
+        self.line += msg + '\n'
+        D2("write '%s\\n'"% msg)
 
     def get(self):
         return self.line

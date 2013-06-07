@@ -29,9 +29,6 @@
 #define _BIONIC_FUTEX_H
 
 #include <linux/futex.h>
-#include <sys/cdefs.h>
-
-__BEGIN_DECLS
 
 extern int __futex_wait(volatile void *ftx, int val, const struct timespec *timeout);
 extern int __futex_wake(volatile void *ftx, int count);
@@ -56,7 +53,5 @@ extern int __futex_syscall4(volatile void *ftx, int op, int val, const struct ti
  */
 extern int  __futex_wake_ex(volatile void *ftx, int pshared, int val);
 extern int  __futex_wait_ex(volatile void *ftx, int pshared, int val, const struct timespec *timeout);
-
-__END_DECLS
 
 #endif /* _BIONIC_FUTEX_H */

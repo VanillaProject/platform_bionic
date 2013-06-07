@@ -39,17 +39,16 @@ TEST(string, strerror) {
   ASSERT_STREQ("Operation not permitted", strerror(1));
 
   // Invalid.
-  ASSERT_STREQ("Unknown error -1", strerror(-1));
+  ASSERT_STREQ("Unknown error 4294967295", strerror(-1));
   ASSERT_STREQ("Unknown error 1234", strerror(1234));
 }
 
-#if __BIONIC__ // glibc's strerror isn't thread safe, only its strsignal.
-
-static void* ConcurrentStrErrorFn(void*) {
+void* ConcurrentStrErrorFn(void* arg) {
   bool equal = (strcmp("Unknown error 2002", strerror(2002)) == 0);
   return reinterpret_cast<void*>(equal);
 }
 
+#if __BIONIC__ // glibc's strerror isn't thread safe, only its strsignal.
 TEST(string, strerror_concurrent) {
   const char* strerror1001 = strerror(1001);
   ASSERT_STREQ("Unknown error 1001", strerror1001);
@@ -62,7 +61,6 @@ TEST(string, strerror_concurrent) {
 
   ASSERT_STREQ("Unknown error 1001", strerror1001);
 }
-
 #endif
 
 #if __BIONIC__ // glibc's strerror_r doesn't even have the same signature as the POSIX one.
@@ -77,7 +75,7 @@ TEST(string, strerror_r) {
 
   // Invalid.
   ASSERT_EQ(0, strerror_r(-1, buf, sizeof(buf)));
-  ASSERT_STREQ("Unknown error -1", buf);
+  ASSERT_STREQ("Unknown error 4294967295", buf);
   ASSERT_EQ(0, strerror_r(1234, buf, sizeof(buf)));
   ASSERT_STREQ("Unknown error 1234", buf);
 
@@ -104,7 +102,7 @@ TEST(string, strsignal) {
   ASSERT_STREQ("Unknown signal 1234", strsignal(1234)); // Too large.
 }
 
-static void* ConcurrentStrSignalFn(void*) {
+void* ConcurrentStrSignalFn(void* arg) {
   bool equal = (strcmp("Unknown signal 2002", strsignal(2002)) == 0);
   return reinterpret_cast<void*>(equal);
 }
@@ -209,174 +207,6 @@ TEST(string, strcat) {
   }
 }
 
-// one byte target with "\0" source
-TEST(string, strcpy2) {
-  char buf[1];
-  char* orig = strdup("");
-  strcpy(buf, orig);
-  ASSERT_EQ('\0', buf[0]);
-  free(orig);
-}
-
-// multibyte target where we under fill target
-TEST(string, strcpy3) {
-  char buf[10];
-  char* orig = strdup("12345");
-  memset(buf, 'A', sizeof(buf));
-  strcpy(buf, orig);
-  ASSERT_EQ('1',  buf[0]);
-  ASSERT_EQ('2',  buf[1]);
-  ASSERT_EQ('3',  buf[2]);
-  ASSERT_EQ('4',  buf[3]);
-  ASSERT_EQ('5',  buf[4]);
-  ASSERT_EQ('\0', buf[5]);
-  ASSERT_EQ('A',  buf[6]);
-  ASSERT_EQ('A',  buf[7]);
-  ASSERT_EQ('A',  buf[8]);
-  ASSERT_EQ('A',  buf[9]);
-  free(orig);
-}
-
-// multibyte target where we fill target exactly
-TEST(string, strcpy4) {
-  char buf[10];
-  char* orig = strdup("123456789");
-  memset(buf, 'A', sizeof(buf));
-  strcpy(buf, orig);
-  ASSERT_EQ('1',  buf[0]);
-  ASSERT_EQ('2',  buf[1]);
-  ASSERT_EQ('3',  buf[2]);
-  ASSERT_EQ('4',  buf[3]);
-  ASSERT_EQ('5',  buf[4]);
-  ASSERT_EQ('6',  buf[5]);
-  ASSERT_EQ('7',  buf[6]);
-  ASSERT_EQ('8',  buf[7]);
-  ASSERT_EQ('9',  buf[8]);
-  ASSERT_EQ('\0', buf[9]);
-  free(orig);
-}
-
-TEST(string, strcat2) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strcat(buf, "01234");
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('\0', buf[6]);
-  ASSERT_EQ('A',  buf[7]);
-  ASSERT_EQ('A',  buf[8]);
-  ASSERT_EQ('A',  buf[9]);
-}
-
-TEST(string, strcat3) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strcat(buf, "01234567");
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('5', buf[6]);
-  ASSERT_EQ('6',  buf[7]);
-  ASSERT_EQ('7',  buf[8]);
-  ASSERT_EQ('\0',  buf[9]);
-}
-
-TEST(string, strncat2) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strncat(buf, "01234", sizeof(buf) - strlen(buf) - 1);
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('\0', buf[6]);
-  ASSERT_EQ('A',  buf[7]);
-  ASSERT_EQ('A',  buf[8]);
-  ASSERT_EQ('A',  buf[9]);
-}
-
-TEST(string, strncat3) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strncat(buf, "0123456789", 5);
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('\0', buf[6]);
-  ASSERT_EQ('A',  buf[7]);
-  ASSERT_EQ('A',  buf[8]);
-  ASSERT_EQ('A',  buf[9]);
-}
-
-TEST(string, strncat4) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strncat(buf, "01234567", 8);
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('5', buf[6]);
-  ASSERT_EQ('6',  buf[7]);
-  ASSERT_EQ('7',  buf[8]);
-  ASSERT_EQ('\0',  buf[9]);
-}
-
-TEST(string, strncat5) {
-  char buf[10];
-  memset(buf, 'A', sizeof(buf));
-  buf[0] = 'a';
-  buf[1] = '\0';
-  char* res = strncat(buf, "01234567", 9);
-  ASSERT_EQ(buf, res);
-  ASSERT_EQ('a',  buf[0]);
-  ASSERT_EQ('0',  buf[1]);
-  ASSERT_EQ('1',  buf[2]);
-  ASSERT_EQ('2',  buf[3]);
-  ASSERT_EQ('3',  buf[4]);
-  ASSERT_EQ('4',  buf[5]);
-  ASSERT_EQ('5', buf[6]);
-  ASSERT_EQ('6',  buf[7]);
-  ASSERT_EQ('7',  buf[8]);
-  ASSERT_EQ('\0',  buf[9]);
-}
-
-TEST(string, strchr_with_0) {
-  char buf[10];
-  const char* s = "01234";
-  memcpy(buf, s, strlen(s) + 1);
-  EXPECT_TRUE(strchr(buf, '\0') == (buf + strlen(s)));
-}
-
 TEST(string, strchr) {
   int seek_char = random() & 255;
 
@@ -472,7 +302,6 @@ TEST(string, strcpy) {
                  (memcmp(state.ptr2, state.ptr + state.MAX_LEN, state.MAX_LEN) != 0));
   }
 }
-
 
 #if __BIONIC__
 TEST(string, strlcat) {

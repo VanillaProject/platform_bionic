@@ -31,15 +31,13 @@
 #include <grp.h>
 #include <mntent.h>
 #include <netdb.h>
+#include <private/android_filesystem_config.h>
+#include <private/logd.h>
 #include <pthread.h>
 #include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
-#include "private/android_filesystem_config.h"
-#include "private/ErrnoRestorer.h"
-#include "private/libc_logging.h"
 
 // Thread-specific state for the non-reentrant functions.
 static pthread_once_t stubs_once = PTHREAD_ONCE_INIT;
@@ -59,7 +57,7 @@ static int do_getpw_r(int by_name, const char* name, uid_t uid,
                       passwd** result) {
   // getpwnam_r and getpwuid_r don't modify errno, but library calls we
   // make might.
-  ErrnoRestorer errno_restorer;
+  int old_errno = errno;
   *result = NULL;
 
   // Our implementation of getpwnam(3) and getpwuid(3) use thread-local
@@ -70,7 +68,9 @@ static int do_getpw_r(int by_name, const char* name, uid_t uid,
   // POSIX allows failure to find a match to be considered a non-error.
   // Reporting success (0) but with *result NULL is glibc's behavior.
   if (src == NULL) {
-    return (errno == ENOENT) ? 0 : errno;
+    int rc = (errno == ENOENT) ? 0 : errno;
+    errno = old_errno;
+    return rc;
   }
 
   // Work out where our strings will go in 'buf', and whether we've got
@@ -83,11 +83,13 @@ static int do_getpw_r(int by_name, const char* name, uid_t uid,
   dst->pw_shell = buf + required_byte_count;
   required_byte_count += strlen(src->pw_shell) + 1;
   if (byte_count < required_byte_count) {
+    errno = old_errno;
     return ERANGE;
   }
 
   // Copy the strings.
-  snprintf(buf, byte_count, "%s%c%s%c%s", src->pw_name, 0, src->pw_dir, 0, src->pw_shell);
+  snprintf(buf, byte_count, "%s%c%s%c%s",
+           src->pw_name, 0, src->pw_dir, 0, src->pw_shell);
 
   // pw_passwd is non-POSIX and unused (always NULL) in bionic.
   // pw_gecos is non-POSIX and missing in bionic.
@@ -98,6 +100,7 @@ static int do_getpw_r(int by_name, const char* name, uid_t uid,
   dst->pw_uid = src->pw_uid;
 
   *result = dst;
+  errno = old_errno;
   return 0;
 }
 
@@ -368,8 +371,7 @@ passwd* getpwnam(const char* login) { // NOLINT: implementing bad function.
   return app_id_to_passwd(app_id_from_name(login), state);
 }
 
-// All users are in just one group, the one passed in.
-int getgrouplist(const char* /*user*/, gid_t group, gid_t* groups, int* ngroups) {
+int getgrouplist(const char* user, gid_t group, gid_t* groups, int* ngroups) {
     if (*ngroups < 1) {
         *ngroups = 1;
         return -1;
@@ -410,51 +412,51 @@ group* getgrnam(const char* name) { // NOLINT: implementing bad function.
   return app_id_to_group(app_id_from_name(name), state);
 }
 
-// We don't have an /etc/networks, so all inputs return NULL.
-netent* getnetbyname(const char* /*name*/) {
-  return NULL;
-}
-
-// We don't have an /etc/networks, so all inputs return NULL.
-netent* getnetbyaddr(uint32_t /*net*/, int /*type*/) {
-  return NULL;
-}
-
-// We don't have an /etc/protocols, so all inputs return NULL.
-protoent* getprotobyname(const char* /*name*/) {
-  return NULL;
-}
-
-// We don't have an /etc/protocols, so all inputs return NULL.
-protoent* getprotobynumber(int /*proto*/) {
-  return NULL;
-}
-
 static void unimplemented_stub(const char* function) {
   const char* fmt = "%s(3) is not implemented on Android\n";
-  __libc_format_log(ANDROID_LOG_WARN, "libc", fmt, function);
+  __libc_android_log_print(ANDROID_LOG_WARN, "libc", fmt, function);
   fprintf(stderr, fmt, function);
 }
 
 #define UNIMPLEMENTED unimplemented_stub(__PRETTY_FUNCTION__)
 
+netent* getnetbyname(const char* name) {
+  UNIMPLEMENTED;
+  return NULL;
+}
+
 void endpwent() {
   UNIMPLEMENTED;
 }
 
-mntent* getmntent(FILE* /*f*/) {
+mntent* getmntent(FILE* f) {
   UNIMPLEMENTED;
   return NULL;
 }
 
-char* ttyname(int /*fd*/) { // NOLINT: implementing bad function.
+char* ttyname(int fd) { // NOLINT: implementing bad function.
   UNIMPLEMENTED;
   return NULL;
 }
 
-int ttyname_r(int /*fd*/, char* /*buf*/, size_t /*buflen*/) {
+int ttyname_r(int fd, char* buf, size_t buflen) {
   UNIMPLEMENTED;
   return -ERANGE;
+}
+
+netent* getnetbyaddr(uint32_t net, int type) {
+  UNIMPLEMENTED;
+  return NULL;
+}
+
+protoent* getprotobyname(const char* name) {
+  UNIMPLEMENTED;
+  return NULL;
+}
+
+protoent* getprotobynumber(int proto) {
+  UNIMPLEMENTED;
+  return NULL;
 }
 
 char* getusershell() {

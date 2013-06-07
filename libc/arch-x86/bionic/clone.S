@@ -1,8 +1,15 @@
-#include <asm/unistd.h>
-#include <machine/asm.h>
+#include <sys/linux-syscalls.h>
 
-// int  __pthread_clone(void* (*fn)(void*), void* tls, int flags, void* arg);
-ENTRY(__pthread_clone)
+.text
+
+/*
+ * int  __pthread_clone(int (*fn)(void*), void *tls, int flags,
+ *                      void *arg);
+ */
+.globl __pthread_clone
+.type __pthread_clone, @function
+.align 4
+__pthread_clone:
         pushl   %ebx
         pushl   %ecx
         movl    16(%esp), %ecx
@@ -21,37 +28,30 @@ ENTRY(__pthread_clone)
 
         subl    $16, %ecx
         movl    20(%esp), %ebx
-
-        # make system call
         movl    $__NR_clone, %eax
         int     $0x80
-
-        cmpl    $0, %eax
-        je      pc_child
-        jg      pc_parent
+        test    %eax, %eax
+        jns     1f
 
         # an error occurred, set errno and return -1
         negl    %eax
-        pushl   %eax
         call    __set_errno
-        addl    $4, %esp
         orl     $-1, %eax
-        jmp     pc_return
+        jmp     2f
 
-pc_child:
+1:
+        jnz     2f
+
         # we're in the child thread now, call __thread_entry
         # with the appropriate arguments on the child stack
         # we already placed most of them
         call    __thread_entry
         hlt
 
-pc_parent:
-        # we're the parent; nothing to do.
-pc_return:
+2:
         popl    %ecx
         popl    %ebx
         ret
-END(__pthread_clone)
 
 
 /*
@@ -63,7 +63,11 @@ END(__pthread_clone)
  *                     int           (*fn)(void *),
  *                     void          *arg);
  */
-ENTRY(__bionic_clone)
+.text
+.globl __bionic_clone
+.type __bionic_clone, @function
+.align 4
+__bionic_clone:
         pushl   %ebx
         pushl   %esi
         pushl   %edi
@@ -81,35 +85,28 @@ ENTRY(__bionic_clone)
         movl    24(%esp), %edx
         movl    32(%esp), %esi
         movl    28(%esp), %edi
-
-        # make system call
         movl    $__NR_clone, %eax
         int     $0x80
-
-        cmpl    $0, %eax
-        je      bc_child
-        jg      bc_parent
+        test    %eax, %eax
+        jns     1f
 
         # an error occurred, set errno and return -1
         negl    %eax
-        pushl   %eax
         call    __set_errno
-        addl    $4, %esp
         orl     $-1, %eax
-        jmp     bc_return
+        jmp     2f
 
-bc_child:
+1:
+        jnz     2f
+
         # we're in the child now, call __bionic_clone_entry
         # with the appropriate arguments on the child stack
         # we already placed most of them
         call    __bionic_clone_entry
         hlt
 
-bc_parent:
-        # we're the parent; nothing to do.
-bc_return:
+2:
         popl    %edi
         popl    %esi
         popl    %ebx
         ret
-END(__bionic_clone)

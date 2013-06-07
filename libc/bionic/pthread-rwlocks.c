@@ -42,7 +42,7 @@
  *  - trying to get the read-lock while there is a writer blocks
  *  - a single thread can acquire the lock multiple times in the same mode
  *
- *  - Posix states that behavior is undefined it a thread tries to acquire
+ *  - Posix states that behaviour is undefined it a thread tries to acquire
  *    the lock in two distinct modes (e.g. write after read, or read after write).
  *
  *  - This implementation tries to avoid writer starvation by making the readers
@@ -60,6 +60,12 @@
 #define  RWLOCKATTR_SHARED_MASK 0x0010
 
 extern pthread_internal_t* __get_thread(void);
+
+/* Return a global kernel ID for the current thread */
+static int __get_thread_id(void)
+{
+    return __get_thread()->kernel_id;
+}
 
 int pthread_rwlockattr_init(pthread_rwlockattr_t *attr)
 {
@@ -144,6 +150,8 @@ int pthread_rwlock_init(pthread_rwlock_t *rwlock, const pthread_rwlockattr_t *at
 
 int pthread_rwlock_destroy(pthread_rwlock_t *rwlock)
 {
+    int  ret;
+
     if (rwlock == NULL)
         return EINVAL;
 
@@ -156,7 +164,7 @@ int pthread_rwlock_destroy(pthread_rwlock_t *rwlock)
 }
 
 /* Returns TRUE iff we can acquire a read lock. */
-static __inline__ int read_precondition(pthread_rwlock_t* rwlock, int tid)
+static __inline__ int read_precondition(pthread_rwlock_t *rwlock, int  thread_id)
 {
     /* We can't have the lock if any writer is waiting for it (writer bias).
      * This tries to avoid starvation when there are multiple readers racing.
@@ -166,7 +174,7 @@ static __inline__ int read_precondition(pthread_rwlock_t* rwlock, int tid)
 
     /* We can have the lock if there is no writer, or if we write-own it */
     /* The second test avoids a self-dead lock in case of buggy code. */
-    if (rwlock->writerThreadId == 0 || rwlock->writerThreadId == tid)
+    if (rwlock->writerThreadId == 0 || rwlock->writerThreadId == thread_id)
         return 1;
 
     /* Otherwise, we can't have it */
@@ -174,14 +182,14 @@ static __inline__ int read_precondition(pthread_rwlock_t* rwlock, int tid)
 }
 
 /* returns TRUE iff we can acquire a write lock. */
-static __inline__ int write_precondition(pthread_rwlock_t* rwlock, int tid)
+static __inline__ int write_precondition(pthread_rwlock_t *rwlock, int  thread_id)
 {
     /* We can get the lock if nobody has it */
     if (rwlock->numLocks == 0)
         return 1;
 
     /* Or if we already own it */
-    if (rwlock->writerThreadId == tid)
+    if (rwlock->writerThreadId == thread_id)
         return 1;
 
     /* Otherwise, not */
@@ -212,7 +220,7 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock)
         return EINVAL;
 
     pthread_mutex_lock(&rwlock->lock);
-    if (__unlikely(!read_precondition(rwlock, __get_thread()->tid)))
+    if (__unlikely(!read_precondition(rwlock, __get_thread_id())))
         ret = EBUSY;
     else
         rwlock->numLocks ++;
@@ -223,18 +231,18 @@ int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock)
 
 int pthread_rwlock_timedrdlock(pthread_rwlock_t *rwlock, const struct timespec *abs_timeout)
 {
-    int ret = 0;
+    int thread_id, ret = 0;
 
     if (rwlock == NULL)
         return EINVAL;
 
     pthread_mutex_lock(&rwlock->lock);
-    int tid = __get_thread()->tid;
-    if (__unlikely(!read_precondition(rwlock, tid))) {
+    thread_id = __get_thread_id();
+    if (__unlikely(!read_precondition(rwlock, thread_id))) {
         rwlock->pendingReaders += 1;
         do {
             ret = pthread_cond_timedwait(&rwlock->cond, &rwlock->lock, abs_timeout);
-        } while (ret == 0 && !read_precondition(rwlock, tid));
+        } while (ret == 0 && !read_precondition(rwlock, thread_id));
         rwlock->pendingReaders -= 1;
         if (ret != 0)
             goto EXIT;
@@ -253,18 +261,18 @@ int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock)
 
 int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock)
 {
-    int ret = 0;
+    int thread_id, ret = 0;
 
     if (rwlock == NULL)
         return EINVAL;
 
     pthread_mutex_lock(&rwlock->lock);
-    int tid = __get_thread()->tid;
-    if (__unlikely(!write_precondition(rwlock, tid))) {
+    thread_id = __get_thread_id();
+    if (__unlikely(!write_precondition(rwlock, thread_id))) {
         ret = EBUSY;
     } else {
         rwlock->numLocks ++;
-        rwlock->writerThreadId = tid;
+        rwlock->writerThreadId = thread_id;
     }
     pthread_mutex_unlock(&rwlock->lock);
     return ret;
@@ -272,14 +280,14 @@ int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock)
 
 int pthread_rwlock_timedwrlock(pthread_rwlock_t *rwlock, const struct timespec *abs_timeout)
 {
-    int ret = 0;
+    int thread_id, ret = 0;
 
     if (rwlock == NULL)
         return EINVAL;
 
     pthread_mutex_lock(&rwlock->lock);
-    int tid = __get_thread()->tid;
-    if (__unlikely(!write_precondition(rwlock, tid))) {
+    thread_id = __get_thread_id();
+    if (__unlikely(!write_precondition(rwlock, thread_id))) {
         /* If we can't read yet, wait until the rwlock is unlocked
          * and try again. Increment pendingReaders to get the
          * cond broadcast when that happens.
@@ -287,13 +295,13 @@ int pthread_rwlock_timedwrlock(pthread_rwlock_t *rwlock, const struct timespec *
         rwlock->pendingWriters += 1;
         do {
             ret = pthread_cond_timedwait(&rwlock->cond, &rwlock->lock, abs_timeout);
-        } while (ret == 0 && !write_precondition(rwlock, tid));
+        } while (ret == 0 && !write_precondition(rwlock, thread_id));
         rwlock->pendingWriters -= 1;
         if (ret != 0)
             goto EXIT;
     }
     rwlock->numLocks ++;
-    rwlock->writerThreadId = tid;
+    rwlock->writerThreadId = thread_id;
 EXIT:
     pthread_mutex_unlock(&rwlock->lock);
     return ret;
@@ -324,7 +332,7 @@ int pthread_rwlock_unlock(pthread_rwlock_t *rwlock)
      * must be ourselves.
      */
     else {
-        if (rwlock->writerThreadId != __get_thread()->tid) {
+        if (rwlock->writerThreadId != __get_thread_id()) {
             ret = EPERM;
             goto EXIT;
         }

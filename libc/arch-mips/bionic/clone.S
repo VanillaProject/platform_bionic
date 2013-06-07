@@ -25,19 +25,18 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
-#include <asm/unistd.h>
-#include <linux/errno.h>
 #include <linux/sched.h>
-
+#include <sys/linux-syscalls.h>
+#include <linux/errno.h>
+        
 	.text
 	.type __pthread_clone, @function
 	.global __pthread_clone
 	.align 4
         .ent __pthread_clone
-
+        
 /*
- * int __pthread_clone(void* (*fn)(void*), void *child_stack,
+ * int __pthread_clone(int (*fn)(void*), void *child_stack,
  *			 int flags, void *arg);
  */
 
@@ -70,7 +69,7 @@ __pthread_clone:
         bnez	$a3,.L__error
 
         beqz	$v0,.L__thread_start
-
+        
         j $ra
 
 .L__thread_start:
@@ -78,7 +77,7 @@ __pthread_clone:
         lw	$a1,4($sp)	#  arg
         addu	$a2,$sp,16	#  tls
 
-	# void __thread_entry(void* (*func)(void*), void *arg, void *tls)
+	# void __thread_entry(int (*func)(void*), void *arg, void *tls)
         la	$t9, __thread_entry
         j	$t9
 
@@ -126,7 +125,7 @@ __bionic_clone:
         bnez	$a3,.L__error_bc
 
         beqz	$v0,.L__thread_start_bc
-
+        
         j $ra
 
 .L__thread_start_bc:
@@ -143,3 +142,4 @@ __bionic_clone:
 	j	$t9
 
         .end __bionic_clone
+	

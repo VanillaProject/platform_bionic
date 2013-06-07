@@ -26,7 +26,6 @@
  * SUCH DAMAGE.
  */
 
-#include <arpa/inet.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -37,19 +36,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <unwind.h>
+
+#include <arpa/inet.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/system_properties.h>
 #include <sys/types.h>
 #include <sys/un.h>
-#include <unistd.h>
-#include <unwind.h>
 
-#include "debug_stacktrace.h"
 #include "dlmalloc.h"
-#include "libc_logging.h"
+#include "logd.h"
 #include "malloc_debug_common.h"
-#include "ScopedPthreadMutexLocker.h"
 
 // This file should be included into the build only when
 // MALLOC_LEAK_CHECK, or MALLOC_QEMU_INSTRUMENT, or both
@@ -90,7 +89,7 @@ static AllocationEntry* to_header(void* mem) {
 // Hash Table functions
 // =============================================================================
 
-static uint32_t get_hash(uintptr_t* backtrace, size_t numEntries) {
+static uint32_t get_hash(intptr_t* backtrace, size_t numEntries) {
     if (backtrace == NULL) return 0;
 
     int hash = 0;
@@ -103,7 +102,7 @@ static uint32_t get_hash(uintptr_t* backtrace, size_t numEntries) {
 }
 
 static HashEntry* find_entry(HashTable* table, int slot,
-                             uintptr_t* backtrace, size_t numEntries, size_t size) {
+        intptr_t* backtrace, size_t numEntries, size_t size) {
     HashEntry* entry = table->slots[slot];
     while (entry != NULL) {
         //debug_log("backtrace: %p, entry: %p entry->backtrace: %p\n",
@@ -113,7 +112,7 @@ static HashEntry* find_entry(HashTable* table, int slot,
          * including the flag bits.
          */
         if (entry->size == size && entry->numEntries == numEntries &&
-                !memcmp(backtrace, entry->backtrace, numEntries * sizeof(uintptr_t))) {
+                !memcmp(backtrace, entry->backtrace, numEntries * sizeof(intptr_t))) {
             return entry;
         }
 
@@ -123,7 +122,7 @@ static HashEntry* find_entry(HashTable* table, int slot,
     return NULL;
 }
 
-static HashEntry* record_backtrace(uintptr_t* backtrace, size_t numEntries, size_t size) {
+static HashEntry* record_backtrace(intptr_t* backtrace, size_t numEntries, size_t size) {
     size_t hash = get_hash(backtrace, numEntries);
     size_t slot = hash % HASHTABLE_SIZE;
 
@@ -142,7 +141,7 @@ static HashEntry* record_backtrace(uintptr_t* backtrace, size_t numEntries, size
         entry->allocations++;
     } else {
         // create a new entry
-        entry = static_cast<HashEntry*>(dlmalloc(sizeof(HashEntry) + numEntries*sizeof(uintptr_t)));
+        entry = static_cast<HashEntry*>(dlmalloc(sizeof(HashEntry) + numEntries*sizeof(intptr_t)));
         if (!entry) {
             return NULL;
         }
@@ -153,7 +152,7 @@ static HashEntry* record_backtrace(uintptr_t* backtrace, size_t numEntries, size
         entry->numEntries = numEntries;
         entry->size = size;
 
-        memcpy(entry->backtrace, backtrace, numEntries * sizeof(uintptr_t));
+        memcpy(entry->backtrace, backtrace, numEntries * sizeof(intptr_t));
 
         gHashTable.slots[slot] = entry;
 
@@ -256,6 +255,8 @@ extern "C" void* fill_memalign(size_t alignment, size_t bytes) {
 
 static void* MEMALIGN_GUARD = reinterpret_cast<void*>(0xA1A41520);
 
+extern __LIBC_HIDDEN__ int get_backtrace(intptr_t* addrs, size_t max_entries);
+
 extern "C" void* leak_malloc(size_t bytes) {
     // allocate enough space infront of the allocation to store the pointer for
     // the alloc structure. This will making free'ing the structer really fast!
@@ -272,7 +273,7 @@ extern "C" void* leak_malloc(size_t bytes) {
     if (base != NULL) {
         ScopedPthreadMutexLocker locker(&gAllocationsMutex);
 
-        uintptr_t backtrace[BACKTRACE_SIZE];
+        intptr_t backtrace[BACKTRACE_SIZE];
         size_t numEntries = get_backtrace(backtrace, BACKTRACE_SIZE);
 
         AllocationEntry* header = reinterpret_cast<AllocationEntry*>(base);
@@ -365,7 +366,7 @@ extern "C" void* leak_memalign(size_t alignment, size_t bytes) {
         alignment = 1L << (31 - __builtin_clz(alignment));
     }
 
-    // here, alignment is at least MALLOC_ALIGNMENT<<1 bytes
+    // here, aligment is at least MALLOC_ALIGNMENT<<1 bytes
     // we will align by at least MALLOC_ALIGNMENT bytes
     // and at most alignment-MALLOC_ALIGNMENT bytes
     size_t size = (alignment-MALLOC_ALIGNMENT) + bytes;

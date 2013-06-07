@@ -54,8 +54,6 @@
 #ifndef _RESOLV_PRIVATE_H_
 #define	_RESOLV_PRIVATE_H_
 
-#include <sys/cdefs.h>
-
 #include <resolv.h>
 #include "resolv_static.h"
 

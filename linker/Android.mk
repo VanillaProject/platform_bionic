@@ -1,30 +1,36 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-ifeq ($(TARGET_ARCH),x86)
-    linker_begin_extension := c
-else
-    linker_begin_extension := S
-endif
-
 LOCAL_SRC_FILES:= \
-    arch/$(TARGET_ARCH)/begin.$(linker_begin_extension) \
-    debugger.cpp \
-    dlfcn.cpp \
-    linker.cpp \
-    linker_environ.cpp \
-    linker_phdr.cpp \
-    rt.cpp
+	arch/$(TARGET_ARCH)/begin.S \
+	debugger.c \
+	dlfcn.c \
+	linker.cpp \
+	linker_environ.c \
+	linker_format.c \
+	linker_phdr.c \
+	rt.c
 
-LOCAL_LDFLAGS := -shared -Wl,--exclude-libs,ALL
+LOCAL_LDFLAGS := -shared
 
 LOCAL_CFLAGS += -fno-stack-protector \
         -Wstrict-overflow=5 \
         -fvisibility=hidden \
-        -Wall -Wextra -Werror
+        -std=gnu99 \
+        -Wall -Wextra
 
-# We need to access Bionic private headers in the linker.
+# Set LINKER_DEBUG to either 1 or 0
+#
+LOCAL_CFLAGS += -DLINKER_DEBUG=0
+
+# We need to access Bionic private headers in the linker...
 LOCAL_CFLAGS += -I$(LOCAL_PATH)/../libc/
+
+# ...one of which is <private/bionic_tls.h>, for which we
+# need HAVE_ARM_TLS_REGISTER.
+ifeq ($(TARGET_ARCH)-$(ARCH_ARM_HAVE_TLS_REGISTER),arm-true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
+endif
 
 ifeq ($(TARGET_ARCH),arm)
     LOCAL_CFLAGS += -DANDROID_ARM_LINKER
@@ -36,6 +42,9 @@ endif
 
 ifeq ($(TARGET_ARCH),mips)
     LOCAL_CFLAGS += -DANDROID_MIPS_LINKER
+endif
+ifeq ($(TARGET_HAVE_TEGRA_ERRATA_657451),true)
+    LOCAL_CFLAGS += -DHAVE_TEGRA_ERRATA_657451
 endif
 
 LOCAL_MODULE:= linker

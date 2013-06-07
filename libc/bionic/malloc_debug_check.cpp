@@ -26,59 +26,71 @@
  * SUCH DAMAGE.
  */
 
-#include <arpa/inet.h>
-#include <dlfcn.h>
 #include <errno.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <pthread.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
+#include <time.h>
 #include <stdio.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/system_properties.h>
-#include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
+#include <errno.h>
+#include <stddef.h>
+#include <stdarg.h>
+#include <fcntl.h>
 #include <unwind.h>
+#include <dlfcn.h>
+#include <stdbool.h>
 
-#include "debug_mapinfo.h"
-#include "debug_stacktrace.h"
+#include <sys/types.h>
+#include <sys/system_properties.h>
+
 #include "dlmalloc.h"
-#include "libc_logging.h"
+#include "logd.h"
+
 #include "malloc_debug_common.h"
-#include "ScopedPthreadMutexLocker.h"
+#include "malloc_debug_check_mapinfo.h"
+
+static mapinfo *milist;
 
 /* libc.debug.malloc.backlog */
-extern unsigned int gMallocDebugBacklog;
-extern int gMallocDebugLevel;
+extern unsigned int malloc_double_free_backlog;
 
-#define MAX_BACKTRACE_DEPTH 16
+#define MAX_BACKTRACE_DEPTH 15
 #define ALLOCATION_TAG      0x1ee7d00d
 #define BACKLOG_TAG         0xbabecafe
 #define FREE_POISON         0xa5
+#define BACKLOG_DEFAULT_LEN 100
 #define FRONT_GUARD         0xaa
 #define FRONT_GUARD_LEN     (1<<5)
 #define REAR_GUARD          0xbb
 #define REAR_GUARD_LEN      (1<<5)
 
 static void log_message(const char* format, ...) {
-  va_list args;
-  va_start(args, format);
-  __libc_format_log_va_list(ANDROID_LOG_ERROR, "libc", format, args);
-  va_end(args);
+    extern const MallocDebug __libc_malloc_default_dispatch;
+    extern const MallocDebug* __libc_malloc_dispatch;
+    extern pthread_mutex_t gAllocationsMutex;
+
+    va_list args;
+    {
+        ScopedPthreadMutexLocker locker(&gAllocationsMutex);
+        const MallocDebug* current_dispatch = __libc_malloc_dispatch;
+        __libc_malloc_dispatch = &__libc_malloc_default_dispatch;
+        va_start(args, format);
+        __libc_android_log_vprint(ANDROID_LOG_ERROR, "libc", format, args);
+        va_end(args);
+        __libc_malloc_dispatch = current_dispatch;
+    }
 }
 
 struct hdr_t {
     uint32_t tag;
     hdr_t* prev;
     hdr_t* next;
-    uintptr_t bt[MAX_BACKTRACE_DEPTH];
+    intptr_t bt[MAX_BACKTRACE_DEPTH];
     int bt_depth;
-    uintptr_t freed_bt[MAX_BACKTRACE_DEPTH];
+    intptr_t freed_bt[MAX_BACKTRACE_DEPTH];
     int freed_bt_depth;
     size_t size;
     char front_guard[FRONT_GUARD_LEN];
@@ -100,7 +112,7 @@ static inline hdr_t* meta(void* user) {
     return reinterpret_cast<hdr_t*>(user) - 1;
 }
 
-static unsigned gAllocatedBlockCount;
+static unsigned num;
 static hdr_t *tail;
 static hdr_t *head;
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
@@ -109,6 +121,28 @@ static unsigned backlog_num;
 static hdr_t *backlog_tail;
 static hdr_t *backlog_head;
 static pthread_mutex_t backlog_lock = PTHREAD_MUTEX_INITIALIZER;
+
+extern __LIBC_HIDDEN__ int get_backtrace(intptr_t* addrs, size_t max_entries);
+
+static void print_backtrace(const intptr_t *bt, unsigned int depth) {
+    const mapinfo *mi;
+    unsigned int cnt;
+    unsigned int rel_pc;
+    intptr_t self_bt[MAX_BACKTRACE_DEPTH];
+
+    if (!bt) {
+        depth = get_backtrace(self_bt, MAX_BACKTRACE_DEPTH);
+        bt = self_bt;
+    }
+
+    log_message("*** *** *** *** *** *** *** *** *** *** *** *** *** *** *** ***\n");
+    for (cnt = 0; cnt < depth && cnt < MAX_BACKTRACE_DEPTH; cnt++) {
+        mi = pc_to_mapinfo(milist, bt[cnt], &rel_pc);
+        log_message("\t#%02d  pc %08x  %s\n", cnt,
+                   mi ? (intptr_t)rel_pc : bt[cnt],
+                   mi ? mi->name : "(unknown)");
+    }
+}
 
 static inline void init_front_guard(hdr_t *hdr) {
     memset(hdr->front_guard, FRONT_GUARD, FRONT_GUARD_LEN);
@@ -179,7 +213,7 @@ static inline void add(hdr_t *hdr, size_t size) {
     hdr->size = size;
     init_front_guard(hdr);
     init_rear_guard(hdr);
-    ++gAllocatedBlockCount;
+    num++;
     add_locked(hdr, &tail, &head);
 }
 
@@ -190,7 +224,7 @@ static inline int del(hdr_t *hdr) {
 
     ScopedPthreadMutexLocker locker(&lock);
     del_locked(hdr, &tail, &head);
-    --gAllocatedBlockCount;
+    num--;
     return 0;
 }
 
@@ -259,11 +293,11 @@ static inline int check_allocation_locked(hdr_t *hdr, int *safe) {
     if (!valid && *safe) {
         log_message("+++ ALLOCATION %p SIZE %d ALLOCATED HERE:\n",
                         user(hdr), hdr->size);
-        log_backtrace(hdr->bt, hdr->bt_depth);
+        print_backtrace(hdr->bt, hdr->bt_depth);
         if (hdr->tag == BACKLOG_TAG) {
             log_message("+++ ALLOCATION %p SIZE %d FREED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
+            print_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
         }
     }
 
@@ -296,7 +330,7 @@ static inline void del_from_backlog(hdr_t *hdr) {
 
 static inline int del_leak(hdr_t *hdr, int *safe) {
     ScopedPthreadMutexLocker locker(&lock);
-    return del_and_check_locked(hdr, &tail, &head, &gAllocatedBlockCount, safe);
+    return del_and_check_locked(hdr, &tail, &head, &num, safe);
 }
 
 static inline void add_to_backlog(hdr_t *hdr) {
@@ -306,7 +340,7 @@ static inline void add_to_backlog(hdr_t *hdr) {
     add_locked(hdr, &backlog_tail, &backlog_head);
     poison(hdr);
     /* If we've exceeded the maximum backlog, clear it up */
-    while (backlog_num > gMallocDebugBacklog) {
+    while (backlog_num > malloc_double_free_backlog) {
         hdr_t *gone = backlog_tail;
         del_from_backlog_locked(gone);
         dlfree(gone);
@@ -340,28 +374,32 @@ extern "C" void chk_free(void *ptr) {
     hdr_t* hdr = meta(ptr);
 
     if (del(hdr) < 0) {
-        uintptr_t bt[MAX_BACKTRACE_DEPTH];
-        int depth = get_backtrace(bt, MAX_BACKTRACE_DEPTH);
+        intptr_t bt[MAX_BACKTRACE_DEPTH];
+        int depth;
+        depth = get_backtrace(bt, MAX_BACKTRACE_DEPTH);
         if (hdr->tag == BACKLOG_TAG) {
             log_message("+++ ALLOCATION %p SIZE %d BYTES MULTIPLY FREED!\n",
                        user(hdr), hdr->size);
             log_message("+++ ALLOCATION %p SIZE %d ALLOCATED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(hdr->bt, hdr->bt_depth);
+            print_backtrace(hdr->bt, hdr->bt_depth);
             /* hdr->freed_bt_depth should be nonzero here */
             log_message("+++ ALLOCATION %p SIZE %d FIRST FREED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
+            print_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
             log_message("+++ ALLOCATION %p SIZE %d NOW BEING FREED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(bt, depth);
+            print_backtrace(bt, depth);
         } else {
             log_message("+++ ALLOCATION %p IS CORRUPTED OR NOT ALLOCATED VIA TRACKER!\n",
                        user(hdr));
-            log_backtrace(bt, depth);
+            print_backtrace(bt, depth);
+            /* Leak here so that we do not crash */
+            //dlfree(user(hdr));
         }
     } else {
-        hdr->freed_bt_depth = get_backtrace(hdr->freed_bt, MAX_BACKTRACE_DEPTH);
+        hdr->freed_bt_depth = get_backtrace(hdr->freed_bt,
+                                      MAX_BACKTRACE_DEPTH);
         add_to_backlog(hdr);
     }
 }
@@ -369,35 +407,34 @@ extern "C" void chk_free(void *ptr) {
 extern "C" void *chk_realloc(void *ptr, size_t size) {
 //  log_message("%s: %s\n", __FILE__, __FUNCTION__);
 
-    if (!ptr) {
-        return chk_malloc(size);
-    }
-
-#ifdef REALLOC_ZERO_BYTES_FREE
     if (!size) {
         chk_free(ptr);
         return NULL;
     }
-#endif
+
+    if (!ptr) {
+        return chk_malloc(size);
+    }
 
     hdr_t* hdr = meta(ptr);
 
     if (del(hdr) < 0) {
-        uintptr_t bt[MAX_BACKTRACE_DEPTH];
-        int depth = get_backtrace(bt, MAX_BACKTRACE_DEPTH);
+        intptr_t bt[MAX_BACKTRACE_DEPTH];
+        int depth;
+        depth = get_backtrace(bt, MAX_BACKTRACE_DEPTH);
         if (hdr->tag == BACKLOG_TAG) {
             log_message("+++ REALLOCATION %p SIZE %d OF FREED MEMORY!\n",
                        user(hdr), size, hdr->size);
             log_message("+++ ALLOCATION %p SIZE %d ALLOCATED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(hdr->bt, hdr->bt_depth);
+            print_backtrace(hdr->bt, hdr->bt_depth);
             /* hdr->freed_bt_depth should be nonzero here */
             log_message("+++ ALLOCATION %p SIZE %d FIRST FREED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
+            print_backtrace(hdr->freed_bt, hdr->freed_bt_depth);
             log_message("+++ ALLOCATION %p SIZE %d NOW BEING REALLOCATED HERE:\n",
                        user(hdr), hdr->size);
-            log_backtrace(bt, depth);
+            print_backtrace(bt, depth);
 
              /* We take the memory out of the backlog and fall through so the
              * reallocation below succeeds.  Since we didn't really free it, we
@@ -407,7 +444,7 @@ extern "C" void *chk_realloc(void *ptr, size_t size) {
         } else {
             log_message("+++ REALLOCATION %p SIZE %d IS CORRUPTED OR NOT ALLOCATED VIA TRACKER!\n",
                        user(hdr), size);
-            log_backtrace(bt, depth);
+            print_backtrace(bt, depth);
             // just get a whole new allocation and leak the old one
             return dlrealloc(0, size);
             // return dlrealloc(user(hdr), size); // assuming it was allocated externally
@@ -429,58 +466,53 @@ extern "C" void *chk_calloc(int nmemb, size_t size) {
     size_t total_size = nmemb * size;
     hdr_t* hdr = static_cast<hdr_t*>(dlcalloc(1, sizeof(hdr_t) + total_size + sizeof(ftr_t)));
     if (hdr) {
-        hdr->bt_depth = get_backtrace(hdr->bt, MAX_BACKTRACE_DEPTH);
+        hdr->bt_depth = get_backtrace(
+                            hdr->bt, MAX_BACKTRACE_DEPTH);
         add(hdr, total_size);
         return user(hdr);
     }
     return NULL;
 }
 
-static void ReportMemoryLeaks() {
-  // We only track leaks at level 10.
-  if (gMallocDebugLevel != 10) {
-    return;
-  }
-
-  // Use /proc/self/exe link to obtain the program name for logging
-  // purposes. If it's not available, we set it to "<unknown>".
-  char exe[PATH_MAX];
-  int count;
-  if ((count = readlink("/proc/self/exe", exe, sizeof(exe) - 1)) == -1) {
-    strlcpy(exe, "<unknown>", sizeof(exe));
-  } else {
-    exe[count] = '\0';
-  }
-
-  if (gAllocatedBlockCount == 0) {
-    log_message("+++ %s did not leak", exe);
-    return;
-  }
-
-  size_t index = 1;
-  const size_t total = gAllocatedBlockCount;
-  while (head != NULL) {
-    int safe;
-    hdr_t* block = head;
-    log_message("+++ %s leaked block of size %d at %p (leak %d of %d)",
-                exe, block->size, user(block), index++, total);
-    if (del_leak(block, &safe)) {
-      /* safe == 1, because the allocation is valid */
-      log_backtrace(block->bt, block->bt_depth);
+static void heaptracker_free_leaked_memory() {
+    if (num) {
+        log_message("+++ THERE ARE %d LEAKED ALLOCATIONS\n", num);
     }
-  }
 
-  while (backlog_head != NULL) {
-    del_from_backlog(backlog_tail);
-  }
+    hdr_t *del = NULL;
+    while (head) {
+        int safe;
+        del = head;
+        log_message("+++ DELETING %d BYTES OF LEAKED MEMORY AT %p (%d REMAINING)\n",
+                del->size, user(del), num);
+        if (del_leak(del, &safe)) {
+            /* safe == 1, because the allocation is valid */
+            log_message("+++ ALLOCATION %p SIZE %d ALLOCATED HERE:\n",
+                        user(del), del->size);
+            print_backtrace(del->bt, del->bt_depth);
+        }
+        dlfree(del);
+    }
+
+//  log_message("+++ DELETING %d BACKLOGGED ALLOCATIONS\n", backlog_num);
+    while (backlog_head) {
+        del = backlog_tail;
+        del_from_backlog(del);
+        dlfree(del);
+    }
 }
 
+/* Initializes malloc debugging framework.
+ * See comments on MallocDebugInit in malloc_debug_common.h
+ */
 extern "C" int malloc_debug_initialize() {
-  backtrace_startup();
-  return 0;
+    if (!malloc_double_free_backlog)
+        malloc_double_free_backlog = BACKLOG_DEFAULT_LEN;
+    milist = init_mapinfo(getpid());
+    return 0;
 }
 
 extern "C" void malloc_debug_finalize() {
-  ReportMemoryLeaks();
-  backtrace_shutdown();
+    heaptracker_free_leaked_memory();
+    deinit_mapinfo(milist);
 }

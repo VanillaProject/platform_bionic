@@ -26,9 +26,21 @@
  * SUCH DAMAGE.
  */
 
-#include "../../bionic/libc_init_common.h"
-#include <stddef.h>
-#include <stdint.h>
+typedef struct
+{
+    void (**preinit_array)(void);
+    void (**init_array)(void);
+    void (**fini_array)(void);
+} structors_array_t;
+
+extern int main(int argc, char **argv, char **env);
+
+extern void __libc_init(
+  unsigned int *elfdata,
+  void (*onexit)(void),
+  int (*slingshot)(int, char**, char**),
+  structors_array_t const * const structors
+);
 
 __attribute__ ((section (".preinit_array")))
 void (*__PREINIT_ARRAY__)(void) = (void (*)(void)) -1;
@@ -39,14 +51,17 @@ void (*__INIT_ARRAY__)(void) = (void (*)(void)) -1;
 __attribute__ ((section (".fini_array")))
 void (*__FINI_ARRAY__)(void) = (void (*)(void)) -1;
 
-__LIBC_HIDDEN__ void _start() {
+__attribute__((visibility("hidden")))
+void _start() {
   structors_array_t array;
-  array.preinit_array = &__PREINIT_ARRAY__;
-  array.init_array = &__INIT_ARRAY__;
-  array.fini_array = &__FINI_ARRAY__;
+  void *elfdata;
 
-  void* raw_args = (void*) ((uintptr_t) __builtin_frame_address(0) + sizeof(void*));
-  __libc_init(raw_args, NULL, &main, &array);
+  array.preinit_array = &__PREINIT_ARRAY__;
+  array.init_array =    &__INIT_ARRAY__;
+  array.fini_array =    &__FINI_ARRAY__;
+
+  elfdata = __builtin_frame_address(0) + sizeof(void *);
+  __libc_init(elfdata, (void *) 0, &main, &array);
 }
 
 #include "__dso_handle.h"
